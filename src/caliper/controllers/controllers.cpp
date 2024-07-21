@@ -4,6 +4,7 @@
 #include "caliper/caliper-config.h"
 
 #include "caliper/ConfigManager.h"
+#include <cstring>
 
 namespace
 {
@@ -221,7 +222,7 @@ const ConfigManager::ConfigInfo* builtin_controllers_table[] = { &cuda_activity_
                                                                  &spot_controller_info,
                                                                  nullptr };
 
-const char* builtin_option_specs = R"json(
+const char* base_builtin_option_specs = R"json(
     [
     {
      "name"        : "profile.mpi",
@@ -1034,6 +1035,59 @@ const char* builtin_option_specs = R"json(
      "inherit"     : [ "mem.read.bandwidth", "mem.write.bandwidth" ],
     },
     {
+     "name"        : "output",
+     "description" : "Output location ('stdout', 'stderr', or filename)",
+     "type"        : "string",
+     "category"    : "output"
+    },
+    {
+     "name"        : "adiak.import_categories",
+     "services"    : [ "adiak_import" ],
+     "description" : "Adiak import categories. Comma-separated list of integers.",
+     "type"        : "string",
+     "category"    : "adiak"
+    },
+    {
+     "name"        : "max_column_width",
+     "type"        : "int",
+     "description" : "Maximum column width in the tree display",
+     "category"    : "treeformatter"
+    },
+    {
+     "name"        : "print.metadata",
+     "type"        : "bool",
+     "description" : "Print program metadata (Caliper globals and Adiak data)",
+     "category"    : "treeformatter"
+    },
+    {
+     "name"        : "order_as_visited",
+     "type"        : "bool",
+     "description" : "Print tree nodes in the original visit order",
+     "category"    : "treeformatter",
+     "query"       :
+     [
+      { "level":     "local",
+        "let":       [ "o_a_v.slot=first(aggregate.slot)" ],
+        "aggregate": [ "min(o_a_v.slot)" ],
+        "order by":  [ "min#o_a_v.slot"  ]
+      },
+      { "level":     "cross",
+        "aggregate": [ "min(min#o_a_v.slot)" ],
+        "order by":  [ "min#min#o_a_v.slot"  ]
+      }
+)json";
+
+const char* get_builtin_option_specs()
+{
+    const char* terminal = R"json(
+     ]
+    }
+    ]
+  )json";
+    // TODO add logic to change the topdown options based on system arch
+    const char* topdown_opts = "";
+    topdown_opts             = R"json(
+    ,{
      "name"        : "topdown.toplevel",
      "description" : "Top-down analysis for Intel CPUs (top level)",
      "type"        : "bool",
@@ -1210,50 +1264,14 @@ const char* builtin_option_specs = R"json(
       }
      ]
     },
-    {
-     "name"        : "output",
-     "description" : "Output location ('stdout', 'stderr', or filename)",
-     "type"        : "string",
-     "category"    : "output"
-    },
-    {
-     "name"        : "adiak.import_categories",
-     "services"    : [ "adiak_import" ],
-     "description" : "Adiak import categories. Comma-separated list of integers.",
-     "type"        : "string",
-     "category"    : "adiak"
-    },
-    {
-     "name"        : "max_column_width",
-     "type"        : "int",
-     "description" : "Maximum column width in the tree display",
-     "category"    : "treeformatter"
-    },
-    {
-     "name"        : "print.metadata",
-     "type"        : "bool",
-     "description" : "Print program metadata (Caliper globals and Adiak data)",
-     "category"    : "treeformatter"
-    },
-    {
-     "name"        : "order_as_visited",
-     "type"        : "bool",
-     "description" : "Print tree nodes in the original visit order",
-     "category"    : "treeformatter",
-     "query"       :
-     [
-      { "level":     "local",
-        "let":       [ "o_a_v.slot=first(aggregate.slot)" ],
-        "aggregate": [ "min(o_a_v.slot)" ],
-        "order by":  [ "min#o_a_v.slot"  ]
-      },
-      { "level":     "cross",
-        "aggregate": [ "min(min#o_a_v.slot)" ],
-        "order by":  [ "min#min#o_a_v.slot"  ]
-      }
-     ]
-    }
-    ]
-)json";
+  )json";
+    char* full_builtin_option_specs =
+        new char[strlen(base_builtin_option_specs) + strlen(topdown_opts) + strlen(terminal) + 1];
+    strcpy(full_builtin_option_specs, base_builtin_option_specs);
+    strcat(full_builtin_option_specs, topdown_opts);
+    strcat(full_builtin_option_specs, terminal);
+    full_builtin_option_specs[strlen(base_builtin_option_specs) + strlen(topdown_opts) + strlen(terminal)] = '\0';
+    return full_builtin_option_specs;
+}
 
 } // namespace cali
