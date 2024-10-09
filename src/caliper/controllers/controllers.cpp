@@ -1348,7 +1348,8 @@ const char* get_builtin_option_specs()
      "config"      :
      {
        "CALI_PAPI_COUNTERS":
-         "perf::slots,perf::topdown-retiring"
+         "perf::slots,perf::topdown-retiring",
+       "CALI_PAPI_DISABLE_MULTIPLEXING": "true"
      },
      "query"  :
      [
@@ -1375,7 +1376,8 @@ const char* get_builtin_option_specs()
      "config"      :
      {
        "CALI_PAPI_COUNTERS":
-         "perf::slots,perf::topdown-retiring"
+         "perf::slots,perf::topdown-retiring",
+       "CALI_PAPI_DISABLE_MULTIPLEXING": "true"
      },
      "query"  :
      [
