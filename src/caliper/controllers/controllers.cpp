@@ -1189,6 +1189,85 @@ const char* builtin_papi_hsw_option_specs = R"json(
 ]
 )json";
 
+const char* builtin_papi_zen4_option_specs = R"json(
+[
+{
+ "name"        : "topdown.toplevel",
+ "description" : "Top-down analysis for Intel CPUs (top level)",
+ "type"        : "bool",
+ "category"    : "metric",
+ "services"    : [ "topdown" ],
+ "config"      : { "CALI_TOPDOWN_LEVEL": "top" },
+ "query"  :
+ [
+  { "level": "local", "select":
+   [
+    "any(topdown.retiring) as \"Retiring\"",
+    "any(topdown.backend_bound) as \"Backend bound\"",
+    "any(topdown.frontend_bound) as \"Frontend bound\"",
+    "any(topdown.bad_speculation) as \"Bad speculation\"",
+    "any(topdown.smt_contention) as \"SMT contention\""
+   ]
+  },
+  { "level": "cross", "select":
+   [
+    "any(any#topdown.retiring) as \"Retiring\"",
+    "any(any#topdown.backend_bound) as \"Backend bound\"",
+    "any(any#topdown.frontend_bound) as \"Frontend bound\"",
+    "any(any#topdown.bad_speculation) as \"Bad speculation\"",
+    "any(any#topdown.smt_contention) as \"SMT contention\""
+   ]
+  }
+ ]
+},
+{
+ "name"        : "topdown.all",
+ "description" : "Top-down analysis for Intel CPUs (all levels)",
+ "type"        : "bool",
+ "category"    : "metric",
+ "services"    : [ "topdown" ],
+ "config"      : { "CALI_TOPDOWN_LEVEL": "all" },
+ "query"  :
+ [
+  { "level": "local", "select":
+   [
+    "any(topdown.retiring) as \"Retiring\"",
+    "any(topdown.backend_bound) as \"Backend bound\"",
+    "any(topdown.frontend_bound) as \"Frontend bound\"",
+    "any(topdown.bad_speculation) as \"Bad speculation\"",
+    "any(topdown.smt_contention) as \"SMT contention\"",
+    "any(topdown.fetch_latency) as \"Fetch latency\"",
+    "any(topdown.fetch_bandwidth) as \"Fetch bandwidth\"",
+    "any(topdown.branch_mispredicts) as \"Branch mispredicts\"",
+    "any(topdown.pipeline_restarts) as \"Pipeline restarts\"",
+    "any(topdown.memory_bound) as \"Memory bound\"",
+    "any(topdown.core_bound) as \"Core bound\"",
+    "any(topdown.fastpath) as \"Fastpath\"",
+    "any(topdown.microcode) as \"Microcode\""
+   ]
+  },
+  { "level": "cross", "select":
+   [
+    "any(any#topdown.retiring) as \"Retiring\"",
+    "any(any#topdown.backend_bound) as \"Backend bound\"",
+    "any(any#topdown.frontend_bound) as \"Frontend bound\"",
+    "any(any#topdown.bad_speculation) as \"Bad speculation\"",
+    "any(any#topdown.smt_contention) as \"SMT contention\"",
+    "any(any#topdown.fetch_latency) as \"Fetch latency\"",
+    "any(any#topdown.fetch_bandwidth) as \"Fetch bandwidth\"",
+    "any(any#topdown.branch_mispredicts) as \"Branch mispredicts\"",
+    "any(any#topdown.pipeline_restarts) as \"Pipeline restarts\"",
+    "any(any#topdown.memory_bound) as \"Memory bound\"",
+    "any(any#topdown.core_bound) as \"Core bound\"",
+    "any(any#topdown.fastpath) as \"Fastpath\"",
+    "any(any#topdown.microcode) as \"Microcode\""
+   ]
+  }
+ ]
+}
+]
+)json";
+
 #ifdef CALIPER_WITH_PAPI_RDPMC
 const char* builtin_papi_spr_option_specs = R"json(
 [
