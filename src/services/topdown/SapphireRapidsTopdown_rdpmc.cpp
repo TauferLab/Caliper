@@ -53,14 +53,13 @@ SapphireRapidsTopdown::SapphireRapidsTopdown(IntelTopdownLevel level)
     )
 {}
 
-
 bool SapphireRapidsTopdown::setup_config(Caliper& c, Channel& channel) const
 {
     channel.config().set("CALI_PAPI_COUNTERS", m_level == All ? m_all_counters : m_top_counters);
 
     if (!cali::services::register_service(&c, &channel, "papi")) {
         Log(0).stream() << channel.name() << ": topdown: Unable to register papi service, skipping topdown"
-            << std::endl;
+                        << std::endl;
         return false;
     }
 

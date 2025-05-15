@@ -7,7 +7,7 @@
 #include "../Services.h"
 
 #include "HaswellTopdown.h"
-#include "SapphireRapidsTopdown.h"
+#include "PapiComponentTopdown.h"
 
 #include "caliper/SnapshotRecord.h"
 
@@ -37,18 +37,12 @@ class IntelTopdown
     unsigned num_ret_computed;
     unsigned num_ret_skipped;
 
-    topdown::IntelTopdownLevel m_level;
+    topdown::IntelTopdownLevel                  m_level;
     std::shared_ptr<topdown::TopdownCalculator> m_calculator;
 
-    bool find_counter_attrs(CaliperMetadataAccessInterface& db)
-    {
-        return m_calculator->find_counter_attrs(db);
-    }
+    bool find_counter_attrs(CaliperMetadataAccessInterface& db) { return m_calculator->find_counter_attrs(db); }
 
-    void make_result_attrs(CaliperMetadataAccessInterface& db)
-    {
-        m_calculator->make_result_attrs(db);
-    }
+    void make_result_attrs(CaliperMetadataAccessInterface& db) { m_calculator->make_result_attrs(db); }
 
     void postprocess_snapshot_cb(std::vector<Entry>& rec)
     {
@@ -135,12 +129,9 @@ class IntelTopdown
           num_bsp_skipped(0),
           m_level(calculator->get_level()),
           m_calculator(calculator)
-    {
-    }
+    {}
 
-    ~IntelTopdown()
-    {
-    }
+    ~IntelTopdown() {}
 
 public:
 
@@ -162,22 +153,25 @@ public:
         }
 
         std::shared_ptr<topdown::TopdownCalculator> calculator;
+        // TODO decide if we should switch the default from Haswell/Broadwell to the more direct approach introduced with IceLake
 #if defined(CALIPER_HAVE_ARCH)
-        if (std::string(CALIPER_HAVE_ARCH) == "sapphirerapids") {
+        std::string cali_arch_str(CALIPER_HAVE_ARCH);
+        if (cali_arch_str == "sapphirerapids" || cali_arch_str == "icelake") {
             calculator = std::shared_ptr<topdown::TopdownCalculator>(new topdown::SapphireRapidsTopdown(level));
         } else {
 #endif
-            calculator = std::shared_ptr<topdown::TopdownCalculator>(new topdown::HaswellTopdown(level)); // Default type of calculation
+            calculator = std::shared_ptr<topdown::TopdownCalculator>(new topdown::HaswellTopdown(level)
+            ); // Default type of calculation
 #if defined(CALIPER_HAVE_ARCH)
         }
 #endif
 
         calculator->setup_config(*c, *channel);
 
-        IntelTopdown* instance = new IntelTopdown(calculator);
-        std::string channel_name = channel->name();
+        IntelTopdown* instance     = new IntelTopdown(calculator);
+        std::string   channel_name = channel->name();
 
-        channel->events().pre_flush_evt.connect([instance,channel_name](Caliper* c, ChannelBody*, SnapshotView) {
+        channel->events().pre_flush_evt.connect([instance, channel_name](Caliper* c, ChannelBody*, SnapshotView) {
             if (instance->find_counter_attrs(*c))
                 instance->make_result_attrs(*c);
             else

@@ -63,7 +63,7 @@ bool HaswellTopdown::setup_config(Caliper& c, Channel& channel) const
     channel.config().set("CALI_PAPI_ENABLE_MULTIPLEXING", "true");
     if (!cali::services::register_service(&c, &channel, "papi")) {
         Log(0).stream() << channel.name() << ": topdown: Unable to register papi service, skipping topdown"
-            << std::endl;
+                        << std::endl;
         return false;
     }
 

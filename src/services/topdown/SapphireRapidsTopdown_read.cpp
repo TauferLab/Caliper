@@ -56,7 +56,7 @@ bool SapphireRapidsTopdown::setup_config(Caliper& c, Channel& channel) const
 
     if (!cali::services::register_service(&c, &channel, "papi")) {
         Log(0).stream() << channel.name() << ": topdown: Unable to register papi service, skipping topdown"
-            << std::endl;
+                        << std::endl;
         return false;
     }
 

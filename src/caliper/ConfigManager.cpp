@@ -38,7 +38,7 @@ extern const char* builtin_umpire_option_specs;
 extern const char* builtin_kokkos_option_specs;
 
 extern const char* builtin_papi_hsw_option_specs;
-extern const char* builtin_papi_spr_option_specs;
+extern const char* builtin_papi_component_topdown_option_specs;
 
 extern void add_submodule_controllers_and_services();
 
@@ -145,7 +145,7 @@ std::string join_stringlist(const std::vector<std::string>& list)
 std::string join_stringlist(const std::vector<StringConverter>& list)
 {
     std::string ret;
-    int c = 0;
+    int         c = 0;
 
     for (const StringConverter& sc : list) {
         if (c++ > 0)
@@ -387,7 +387,7 @@ class ConfigManager::OptionSpec
                 if (!ret.empty())
                     ret.append(",");
                 ret.append(sc.to_string());
-           }
+            }
         }
 
         return ret.empty() ? ret : std::string(" select ") + ret;
@@ -399,7 +399,7 @@ class ConfigManager::OptionSpec
 
         for (const StringConverter& sc : list) {
             std::map<std::string, StringConverter> dict = sc.rec_dict();
-            std::string query;
+            std::string                            query;
 
             auto it = dict.find("group by");
             if (it != dict.end())
@@ -460,10 +460,10 @@ class ConfigManager::OptionSpec
             parse_config(it->second.rec_dict(&ok), opt);
         it = dict.find("query");
         if (ok && !m_error && it != dict.end()) {
-            bool is_dict = false;
+            bool is_dict    = false;
             auto query_dict = it->second.rec_dict(&is_dict);
             if (is_dict) {
-                for (const auto &query_entry : query_dict)
+                for (const auto& query_entry : query_dict)
                     opt.query[query_entry.first] = query_entry.second.to_string();
             } else {
                 // try parsing deprecated form of query args
@@ -703,9 +703,10 @@ struct ConfigManager::Options::OptionsImpl {
             auto qlvl_it = spec_it->second.query.find(level);
             if (qlvl_it != spec_it->second.query.end()) {
                 // replace "{}" placeholders in spec with argument string, if any
-                auto arg_it = std::find_if(args.begin(), args.end(), [&opt](const std::pair<std::string,std::string>& p){
-                    return opt == p.first;
-                });
+                auto arg_it =
+                    std::find_if(args.begin(), args.end(), [&opt](const std::pair<std::string, std::string>& p) {
+                        return opt == p.first;
+                    });
                 ret.append(" ");
                 ret.append(::expand_variables(qlvl_it->second, arg_it == args.end() ? std::string() : arg_it->second));
             }
@@ -1356,7 +1357,7 @@ struct ConfigManager::ConfigManagerImpl {
     ConfigManagerImpl()
         : builtin_option_specs_list({
 #ifdef CALIPER_HAVE_GOTCHA
-                  builtin_gotcha_option_specs,
+              builtin_gotcha_option_specs,
 #endif
 #ifdef CALIPER_HAVE_MPI
                   builtin_mpi_option_specs,
@@ -1382,13 +1383,15 @@ struct ConfigManager::ConfigManagerImpl {
 #ifdef CALIPER_HAVE_KOKKOS
                   builtin_kokkos_option_specs,
 #endif
-              builtin_base_option_specs
+                  builtin_base_option_specs
           })
     {
 #ifdef CALIPER_HAVE_PAPI
+        // TODO decide if we should switch the default from Haswell/Broadwell to the more direct approach introduced with IceLake
 #ifdef CALIPER_HAVE_ARCH
-        if (std::string(CALIPER_HAVE_ARCH) == "sapphirerapids") {
-            builtin_option_specs_list.push_back(builtin_papi_spr_option_specs);
+        std::string cali_arch_str(CALIPER_HAVE_ARCH);
+        if (cali_arch_str == "sapphirerapids" || cali_arch_str == "icelake") {
+            builtin_option_specs_list.push_back(builtin_papi_component_topdown_option_specs);
         } else {
             builtin_option_specs_list.push_back(builtin_papi_hsw_option_specs);
         }
