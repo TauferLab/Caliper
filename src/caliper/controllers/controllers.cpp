@@ -41,7 +41,7 @@ const char* event_trace_spec = R"json(
    "services": [ "cupti" ]
   },{
    "name": "trace.hip",
-   "description": "Trace CUDA API events",
+   "description": "Trace HIP API events",
    "type": "bool",
    "services": [ "rocprofiler" ],
    "config": { "CALI_ROCPROFILER_ENABLE_API_CALLBACKS": "true" }
@@ -230,6 +230,18 @@ const char* builtin_base_option_specs = R"json(
  "category": "event",
  "config": { "CALI_EVENT_REGION_LEVEL": "{}" }
 },{
+ "name": "include_attributes",
+ "type": "string",
+ "description": "Only take snapshots for the given attribute names/patterns.",
+ "category": "event",
+ "config": { "CALI_EVENT_INCLUDE_ATTRIBUTES": "{}" }
+},{
+ "name": "exclude_attributes",
+ "type": "string",
+ "description": "Do not take snapshots for the given attribute names/patterns.",
+ "category": "event",
+ "config": { "CALI_EVENT_EXCLUDE_ATTRIBUTES": "{}" }
+},{
  "name": "include_branches",
  "type": "string",
  "description": "Only take snapshots for branches with the given region names.",
@@ -249,7 +261,7 @@ const char* builtin_base_option_specs = R"json(
  "config": { "CALI_EVENT_EXCLUDE_REGIONS": "{}" }
 },{
  "name": "region.count",
- "description": "Report number of begin/end region instances",
+ "description": "Report number of region instances",
  "type": "bool",
  "category": "metric",
  "query":
@@ -396,7 +408,7 @@ const char* builtin_mpi_option_specs = R"json(
 },
 {
  "name": "mpi.message.size",
- "description": "MPI message size",
+ "description": "MPI message size statistics",
  "type": "bool",
  "category": "metric",
  "services": [ "mpi" ],
